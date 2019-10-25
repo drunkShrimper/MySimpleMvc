@@ -7,7 +7,7 @@
 
   <servlet>
     <servlet-name>myDispatcherServlet</servlet-name>
-    <servlet-class>com.scau.lipan.servlet.MyDispatcherServlet</servlet-class>
+    <servlet-class>com.scau.myframework.mvc.servlet.MyDispatcherServlet</servlet-class>
     <load-on-startup>0</load-on-startup>
   </servlet>
   

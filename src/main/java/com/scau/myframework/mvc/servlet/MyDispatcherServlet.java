@@ -1,7 +1,7 @@
-package com.scau.lipan.servlet;
+package com.scau.myframework.mvc.servlet;
 
-import com.scau.lipan.annotation.*;
-import com.scau.lipan.controller.UserController;
+import com.scau.myframework.mvc.annotation.*;
+import com.scau.myframework.test.controller.UserController;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 public class MyDispatcherServlet extends HttpServlet {
 

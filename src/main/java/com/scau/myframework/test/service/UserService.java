@@ -1,6 +1,4 @@
-package com.scau.lipan.service;
-
-import com.scau.lipan.annotation.MyService;
+package com.scau.myframework.test.service;
 
 
 public interface UserService {

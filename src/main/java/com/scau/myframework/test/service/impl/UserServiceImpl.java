@@ -1,8 +1,8 @@
-package com.scau.lipan.service.impl;
+package com.scau.myframework.test.service.impl;
 
 
-import com.scau.lipan.annotation.MyService;
-import com.scau.lipan.service.UserService;
+import com.scau.myframework.mvc.annotation.MyService;
+import com.scau.myframework.test.service.UserService;
 
 @MyService("UserServiceImpl")
 public class UserServiceImpl implements UserService {

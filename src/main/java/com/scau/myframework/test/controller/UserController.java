@@ -1,15 +1,15 @@
-package com.scau.lipan.controller;
+package com.scau.myframework.test.controller;
 
-import com.scau.lipan.annotation.MyAutowired;
-import com.scau.lipan.annotation.MyController;
-import com.scau.lipan.annotation.MyRequestMapping;
-import com.scau.lipan.annotation.MyRequestParam;
-import com.scau.lipan.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import com.scau.myframework.mvc.annotation.MyAutowired;
+import com.scau.myframework.mvc.annotation.MyController;
+import com.scau.myframework.mvc.annotation.MyRequestMapping;
+import com.scau.myframework.mvc.annotation.MyRequestParam;
+import com.scau.myframework.test.service.UserService;
 
 @MyController("UserController")
 @MyRequestMapping("/user")

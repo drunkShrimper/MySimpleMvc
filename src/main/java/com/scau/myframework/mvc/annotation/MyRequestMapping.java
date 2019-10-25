@@ -1,4 +1,4 @@
-package com.scau.lipan.annotation;
+package com.scau.myframework.mvc.annotation;
 
 import java.lang.annotation.*;
 

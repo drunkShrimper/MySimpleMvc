@@ -1,10 +1,11 @@
-package com.scau.lipan.annotation;
+package com.scau.myframework.mvc.annotation;
+
 
 import java.lang.annotation.*;
 
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface MyAutowired {
+public @interface MyController {
     String value() default "";
 }
