@@ -1,7 +1,12 @@
 package com.scau.myframework.mvc.servlet;
 
 import com.scau.myframework.mvc.annotation.*;
+import com.scau.myframework.mvc.util.AutoWiredUtils;
+import com.scau.myframework.mvc.util.ClassNameScanner;
+import com.scau.myframework.mvc.util.MappingUtils;
+import com.scau.myframework.mvc.util.ReflectionUtils;
 import com.scau.myframework.test.controller.UserController;
+import com.sun.xml.internal.bind.v2.TODO;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -17,7 +22,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,134 +30,27 @@ import java.util.Map;
 public class MyDispatcherServlet extends HttpServlet {
 
 
-    private List<String> classNames = new ArrayList<String>();
-    Map<String,Object> beans = new HashMap<String,Object>();
-    Map<String,Object> handlerMap = new HashMap<String,Object>();
+    private List<String> classNames ;
+    Map<String,Object> beans ;
+    Map<String,Object> handlerMap ;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
 
-        basePackageScan("com.scau");
-        doInstance();
-        doAutoWired();
-        doUrlMapping();
+        //TODO 后期应该通过读xml配置的方式读入参数，而且应该改为静态方法更合理
+        classNames = new ClassNameScanner().scan("com.scau");
+
+
+        //TODO 后期应该通过ioc模块完成此功能
+        beans = ReflectionUtils.doInstance(classNames);
+
+        //TODO 后期应该通过ioc模块完成此功能
+        AutoWiredUtils.doAutoWired(beans);
+
+
+        handlerMap =  MappingUtils.doUrlMapping(classNames);
     }
 
-    private void basePackageScan(String basePackage){
-
-
-        URL url = this.getClass().getClassLoader().getResource("/"+basePackage.replaceAll("\\.","/"));
-        String fileStr = url.getFile();
-        File file = new File(fileStr);
-
-        String[] filesStr = file.list();
-
-        for(String path:filesStr){
-            File filePath = new File(fileStr + path);
-            if(filePath.isDirectory()){
-                basePackageScan(basePackage+"."+path);
-            }else{
-                classNames.add(basePackage+"."+filePath.getName());
-            }
-        }
-
-    }
-
-    private void doInstance() {
-        for(String className:classNames){
-
-            String cn = className.replace(".class","");
-
-            try{
-                Class<?> clazz = Class.forName(cn);
-
-                if(clazz.isAnnotationPresent(MyController.class)){
-
-                    Object instance = clazz.newInstance();
-                    MyRequestMapping myRequestMapping = clazz.getAnnotation(MyRequestMapping.class);
-                    String key = myRequestMapping.value();
-                    beans.put(key,instance);
-                } else if (clazz.isAnnotationPresent(MyService.class)) {
-
-                    Object instance = clazz.newInstance();
-                    MyService MyService = clazz.getAnnotation(MyService.class);
-                    String key = MyService.value();
-                    beans.put(key,instance);
-                }else {
-                    continue;
-                }
-            }catch (Exception e){
-
-            }
-
-
-        }
-    }
-
-    private void doAutoWired(){
-
-        for(Map.Entry<String,Object> entry:beans.entrySet()){
-
-            Object instance = entry.getValue();
-            Class<?> clazz = instance.getClass();
-
-            try{
-                if(clazz.isAnnotationPresent(MyController.class)){
-                    Field[] fields = clazz.getDeclaredFields();
-                    for (Field field:fields){
-                        if(field.isAnnotationPresent(MyAutowired.class)){
-                            MyAutowired myAutowired = field.getAnnotation(MyAutowired.class);
-                            String key = myAutowired.value();
-
-                            Object bean = beans.get(key);
-                            field.setAccessible(true);
-                            field.set(instance,bean);
-
-                        }else {
-                            continue;
-                        }
-                    }
-                }else {
-                    continue;
-                }
-            }catch (Exception e){
-
-            }
-        }
-    }
-
-    private void  doUrlMapping() {
-
-        for (String className : classNames) {
-            String cn = className.replace(".class", "");
-
-            try {
-                Class<?> clazz = Class.forName(cn);
-
-                if (clazz.isAnnotationPresent(MyController.class)) {
-
-                    Object instance = clazz.newInstance();
-                    MyRequestMapping typeMapping = clazz.getAnnotation(MyRequestMapping.class);
-
-                    Method[] methods = clazz.getMethods();
-                    for(Method method:methods){
-                        if(method.isAnnotationPresent(MyRequestMapping.class)){
-
-                            MyRequestMapping methodMapping = method.getAnnotation(MyRequestMapping.class);
-                            String requestPath = typeMapping.value() + methodMapping.value();
-                            handlerMap.put(requestPath,method);
-                        }else{
-                            continue;
-                        }
-                    }
-                } else {
-                    continue;
-                }
-            } catch (Exception e) {
-
-            }
-        }
-    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -172,7 +69,7 @@ public class MyDispatcherServlet extends HttpServlet {
         String[] strings = requestPath.split("/");
 
         UserController instance = (UserController) beans.get("/" + requestPath.split("/")[1]);
-        System.out.println("/" + requestPath.split("/")[0]);
+        //System.out.println("/" + requestPath.split("/")[0]);
         Object[] args = hand(req, resp, method);
         try {
             method.invoke(instance,args);
