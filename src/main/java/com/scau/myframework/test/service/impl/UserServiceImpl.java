@@ -10,6 +10,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String findOne(String name, String age) {
-        return "name=zhang  age=23";
+        return "name="+name +"  age=" +age;
     }
 }

@@ -20,11 +20,11 @@ public class UserController {
 
     @MyRequestMapping("/findOne")
     public void findOne(HttpServletRequest request, HttpServletResponse response,
-                        @MyRequestParam("name")String name, @MyRequestParam("age")String age) throws IOException {
+                        @MyRequestParam("name")String name, @MyRequestParam("age")String ag) throws IOException {
 
         PrintWriter pw = response.getWriter();
 
-        String user = userService.findOne(name, age);
+        String user = userService.findOne(name, ag);
 
         pw.write(user);
 

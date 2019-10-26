@@ -1,12 +1,10 @@
 package com.scau.myframework.mvc.servlet;
 
 import com.scau.myframework.mvc.annotation.*;
-import com.scau.myframework.mvc.util.AutoWiredUtils;
-import com.scau.myframework.mvc.util.ClassNameScanner;
-import com.scau.myframework.mvc.util.MappingUtils;
-import com.scau.myframework.mvc.util.ReflectionUtils;
+import com.scau.myframework.mvc.helper.ClassHelper;
+import com.scau.myframework.mvc.helper.IocHelper;
+
 import com.scau.myframework.test.controller.UserController;
-import com.sun.xml.internal.bind.v2.TODO;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -15,40 +13,50 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
-public class MyDispatcherServlet extends HttpServlet {
+public class DispatcherServlet extends HttpServlet {
 
 
-    private List<String> classNames ;
-    Map<String,Object> beans ;
+
+    private Map<String,Object> beanMap;
     Map<String,Object> handlerMap ;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
 
-        //TODO 后期应该通过读xml配置的方式读入参数，而且应该改为静态方法更合理
-        classNames = new ClassNameScanner().scan("com.scau");
+        //TODO 获取IOC容器，后期应该通过ioc模块完成此功能而不是IocHelper（IocHelper只能完成mvc的依赖注入逻辑）
+        beanMap =  IocHelper.getBeanMap();
 
+        //将请求路径与对应的处理方法映射起来(即：解析url和Method的关联关系)
+        initHandlerMappings();
 
-        //TODO 后期应该通过ioc模块完成此功能
-        beans = ReflectionUtils.doInstance(classNames);
+        //TODO 处理静态资源，JSP等情况
+    }
 
-        //TODO 后期应该通过ioc模块完成此功能
-        AutoWiredUtils.doAutoWired(beans);
+    private  void initHandlerMappings() {
+        handlerMap = new HashMap<String,Object>();
+        for (Class<?> clazz : ClassHelper.getControllerClass()) {
+            MyRequestMapping typeMapping = clazz.getAnnotation(MyRequestMapping.class);
 
+            Method[] methods = clazz.getMethods();
+            for(Method method:methods){
+                if(method.isAnnotationPresent(MyRequestMapping.class)){
 
-        handlerMap =  MappingUtils.doUrlMapping(classNames);
+                    MyRequestMapping methodMapping = method.getAnnotation(MyRequestMapping.class);
+                    String requestPath = typeMapping.value() + methodMapping.value();
+                    handlerMap.put(requestPath,method);
+                }else{
+                    continue;
+                }
+            }
+        }
     }
 
 
@@ -61,26 +69,17 @@ public class MyDispatcherServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
         String contextPath = req.getContextPath();
-
         String requestPath = uri.replace(contextPath,"");
 
-        Method method = (Method) handlerMap.get(requestPath);
-
-        String[] strings = requestPath.split("/");
-
-        UserController instance = (UserController) beans.get("/" + requestPath.split("/")[1]);
-        //System.out.println("/" + requestPath.split("/")[0]);
-        Object[] args = hand(req, resp, method);
-        try {
-            method.invoke(instance,args);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        handle(req, resp, requestPath);
     }
 
-    private static Object[] hand(HttpServletRequest req, HttpServletResponse resp, Method method){
+    //根据传入的url,利用反射，完成请求处理
+    //只能为带有@MyRequestParam注解的参数赋值，但只是用Object存储，没有进行类型转换
+    //后期还要考虑是否要给对象类型的参数自动注入
+    private  void handle(HttpServletRequest req, HttpServletResponse resp, String  requestPath){
+
+        Method method = (Method) handlerMap.get(requestPath);
 
         Class<?>[] paramClazzs = method.getParameterTypes();
         Object[] args = new Object[paramClazzs.length];
@@ -105,7 +104,15 @@ public class MyDispatcherServlet extends HttpServlet {
             }
             index++;
         }
-        return args;
+        Object instance = beanMap.get("/" + requestPath.split("/")[1]);
+
+        try {
+            method.invoke(instance,args);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
 }
