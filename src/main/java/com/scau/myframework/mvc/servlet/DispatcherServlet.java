@@ -6,8 +6,9 @@ import com.scau.myframework.mvc.entity.ModelAndView;
 import com.scau.myframework.mvc.helper.ClassHelper;
 import com.scau.myframework.mvc.helper.IocHelper;
 
+import com.scau.myframework.mvc.util.CastUtils;
 import com.scau.myframework.mvc.util.PropertiesUtils;
-import com.scau.myframework.test.controller.UserController;
+import com.scau.myframework.mvc.util.ReflectionUtils;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -19,8 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +43,7 @@ public class DispatcherServlet extends HttpServlet {
         //将请求路径与对应的处理方法映射起来(即：解析url和Method的关联关系)
         initHandlerMappings();
 
-        //TODO 处理静态资源，JSP等情况
+        //TODO 处理访问静态资源、页面等情况
     }
 
     private  void initHandlerMappings() {
@@ -85,42 +87,12 @@ public class DispatcherServlet extends HttpServlet {
 
         Method method = (Method) handlerMap.get(requestPath);
 
-        Class<?>[] paramClazzs = method.getParameterTypes();
 
-        //TODO 这里的参数没有经过类型转换，都是string类型
-        Object[] args = new Object[paramClazzs.length];
-
-        int args_i = 0;
-        int index = 0;
-        for (Class<?> paramClazz:paramClazzs){
-            if(ServletRequest.class.isAssignableFrom(paramClazz)){
-                args[args_i++] = req;
-            }
-            if(ServletResponse.class.isAssignableFrom(paramClazz)){
-                args[args_i++] = resp;
-            }
-            Annotation[] paramAns = method.getParameterAnnotations()[index];
-            if (paramAns.length > 0){
-                for (Annotation paramAn:paramAns){
-                    if(MyRequestParam.class.isAssignableFrom(paramAn.getClass())){
-                        MyRequestParam myRequestParam = (MyRequestParam) paramAn;
-                        args[args_i++] = req.getParameter(myRequestParam.value());
-                    }
-                }
-            }
-            index++;
-        }
         Object instance = beanMap.get("/" + requestPath.split("/")[1]);
 
-        Object result = null;
+        Object[] args = getArgs(method,req,resp);
 
-        try {
-            result = method.invoke(instance, args);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        Object result = ReflectionUtils.invokeMethod(instance,method,args);
 
         if(null == result) {
             return;
@@ -167,10 +139,34 @@ public class DispatcherServlet extends HttpServlet {
             }
             return;
         }
+    }
 
+    private Object[] getArgs(Method method,HttpServletRequest req, HttpServletResponse resp){
+        Class<?>[] paramClazzs = method.getParameterTypes();
+        Parameter[] parameters = method.getParameters();
 
+        Object[] args = new Object[paramClazzs.length];
 
-
+        int idx = 0;
+        for (int i=0; i<paramClazzs.length;i++){
+            //如果方法的参数中写有原生的request，response
+            if(ServletRequest.class.isAssignableFrom(paramClazzs[i])){
+                args[idx++] = req;
+            }else if(ServletResponse.class.isAssignableFrom(paramClazzs[i])){
+                args[idx++] = resp;
+            } else{
+                //一般只在基本类型上使用@MyRequestParam，对于POJO类型并不用使用注解也会自动注入
+                if(parameters[i].isAnnotationPresent(MyRequestParam.class)){
+                    MyRequestParam requestParam = parameters[i].getAnnotation(MyRequestParam.class);
+                    args[idx++] = CastUtils.getBasicInstanceByString(paramClazzs[i],req.getParameter(requestParam.value()));
+                }else{
+                    //没有标注解的，如果是POJO类型，请求参数的name和POJO的属性名要相同才能为其注入。这也是springmvc的约定...(貌似)
+                    //TODO 但是复杂类型如何处理呢？ 貌似spring mvc也是可以自动注入的（即：支持级联属性的注入）
+                    args[idx++] = CastUtils.getPojoInstance(paramClazzs[i],req.getParameterMap());
+                }
+            }
+        }
+        return args;
     }
 
 }

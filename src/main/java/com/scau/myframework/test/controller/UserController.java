@@ -20,14 +20,14 @@ public class UserController {
     private UserService userService;
 
     @MyRequestMapping("/findOne")
-    public User findOne(HttpServletRequest request, HttpServletResponse response,
-                        @MyRequestParam("name")String name, @MyRequestParam("age")String age) throws IOException {
-
-        PrintWriter pw = response.getWriter();
-
-        User user = userService.findOne(name, Integer.valueOf(age));
+    public User findOne(HttpServletRequest request, HttpServletResponse response, User user){
 
         return user;
+    }
 
+    @MyRequestMapping("/show")
+    public String show(HttpServletRequest request, HttpServletResponse response){
+
+        return "redirect:/pages/show.html";
     }
 }

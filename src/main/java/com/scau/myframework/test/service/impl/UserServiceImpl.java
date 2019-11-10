@@ -10,7 +10,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User findOne(String name, int age) {
+    public User findOne(String name, Integer age) {
         return new User(name,age);
     }
 }

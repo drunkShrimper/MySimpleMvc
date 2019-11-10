@@ -7,9 +7,12 @@ package com.scau.myframework.test.entity;
  */
 public class User {
     private String name;
-    private int age;
+    private Integer age;
 
-    public User(String name, int age) {
+    public User() {
+    }
+
+    public User(String name, Integer age) {
         this.name = name;
         this.age = age;
     }
@@ -22,11 +25,11 @@ public class User {
         this.name = name;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 }
