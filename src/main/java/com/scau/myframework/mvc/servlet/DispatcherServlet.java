@@ -1,9 +1,12 @@
 package com.scau.myframework.mvc.servlet;
 
+import com.google.gson.Gson;
 import com.scau.myframework.mvc.annotation.*;
+import com.scau.myframework.mvc.entity.ModelAndView;
 import com.scau.myframework.mvc.helper.ClassHelper;
 import com.scau.myframework.mvc.helper.IocHelper;
 
+import com.scau.myframework.mvc.util.PropertiesUtils;
 import com.scau.myframework.test.controller.UserController;
 
 import javax.servlet.ServletConfig;
@@ -14,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -82,6 +86,8 @@ public class DispatcherServlet extends HttpServlet {
         Method method = (Method) handlerMap.get(requestPath);
 
         Class<?>[] paramClazzs = method.getParameterTypes();
+
+        //TODO 这里的参数没有经过类型转换，都是string类型
         Object[] args = new Object[paramClazzs.length];
 
         int args_i = 0;
@@ -106,13 +112,65 @@ public class DispatcherServlet extends HttpServlet {
         }
         Object instance = beanMap.get("/" + requestPath.split("/")[1]);
 
+        Object result = null;
+
         try {
-            method.invoke(instance,args);
+            result = method.invoke(instance, args);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
+
+        if(null == result) {
+            return;
+        }
+
+        if (result instanceof String) {
+
+            try {
+                if (((String) result).startsWith("redirect:")){
+                    resp.sendRedirect(req.getContextPath()+((String) result).replace("redirect:","").trim());
+                }
+                req.getRequestDispatcher(PropertiesUtils.getJspPath()+result).forward(req, resp);
+            } catch (Exception e) {
+            }
+            return;
+        } else if (result instanceof ModelAndView){
+
+            ModelAndView mv = (ModelAndView) result;
+            if (mv.getPath() != null) {
+                try {
+                    if (mv.getPath().startsWith("redirect:")){
+                        resp.sendRedirect(req.getContextPath()+mv.getPath().replace("redirect:","").trim());
+                        return;
+                    }
+                    Map<String, Object> model = mv.getModels();
+                    for(Map.Entry<String, Object> entry:model.entrySet()){
+                        req.setAttribute(entry.getKey(), entry.getValue());
+                    }
+                    req.getRequestDispatcher(PropertiesUtils.getJspPath()+mv.getPath()).forward(req, resp);
+                } catch (Exception e) {
+
+                }
+            }
+        } else{//其他情况统一返回json数据，（当然包括标注了@MyResponseBody注解的）
+            try {
+                Gson gson = new Gson();
+                resp.setContentType("application/json");
+                resp.setCharacterEncoding("UTF-8");
+                PrintWriter writer = resp.getWriter();
+                writer.write(gson.toJson(result));
+                writer.flush();
+                writer.close();
+            } catch (Exception e) {
+            }
+            return;
+        }
+
+
+
+
     }
 
 }

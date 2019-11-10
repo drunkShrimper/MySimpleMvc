@@ -6,4 +6,8 @@ public class PropertiesUtils {
     public static String getBasePackage(){
         return  "com.scau";
     }
+
+    public static String getJspPath() {
+        return  "/jsp";
+    }
 }

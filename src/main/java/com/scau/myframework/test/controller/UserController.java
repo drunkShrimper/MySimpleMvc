@@ -9,6 +9,7 @@ import com.scau.myframework.mvc.annotation.MyAutowired;
 import com.scau.myframework.mvc.annotation.MyController;
 import com.scau.myframework.mvc.annotation.MyRequestMapping;
 import com.scau.myframework.mvc.annotation.MyRequestParam;
+import com.scau.myframework.test.entity.User;
 import com.scau.myframework.test.service.UserService;
 
 @MyController("UserController")
@@ -19,14 +20,14 @@ public class UserController {
     private UserService userService;
 
     @MyRequestMapping("/findOne")
-    public void findOne(HttpServletRequest request, HttpServletResponse response,
-                        @MyRequestParam("name")String name, @MyRequestParam("age")String ag) throws IOException {
+    public User findOne(HttpServletRequest request, HttpServletResponse response,
+                        @MyRequestParam("name")String name, @MyRequestParam("age")String age) throws IOException {
 
         PrintWriter pw = response.getWriter();
 
-        String user = userService.findOne(name, ag);
+        User user = userService.findOne(name, Integer.valueOf(age));
 
-        pw.write(user);
+        return user;
 
     }
 }

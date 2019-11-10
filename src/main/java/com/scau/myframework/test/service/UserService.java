@@ -1,6 +1,8 @@
 package com.scau.myframework.test.service;
 
 
+import com.scau.myframework.test.entity.User;
+
 public interface UserService {
-    String findOne(String name,String age);
+    User findOne(String name, int age);
 }
