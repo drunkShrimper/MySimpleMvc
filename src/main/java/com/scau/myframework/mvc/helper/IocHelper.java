@@ -17,6 +17,7 @@ import java.util.Map;
 public class IocHelper {
     private static final Map<String, Object> BEAN_MAP = new HashMap<String, Object>();
 
+
     static {
 
         doInstance(); //初始化IOC容器
@@ -27,11 +28,10 @@ public class IocHelper {
     /**
      * TODO 目前只向IOC容器中添加了Controller和Service两种类的实例，其他情况在ioc模块中实现
      */
-    private static void doInstance() {
+    public static void doInstance() {
 
         for (Class<?> clazz : ClassHelper.getControllerClass()) {
             try {
-
 
                 Object instance = clazz.newInstance();
                 MyRequestMapping myRequestMapping = clazz.getAnnotation(MyRequestMapping.class);

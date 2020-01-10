@@ -1,28 +1,24 @@
 package com.scau.myframework.mvc.servlet;
 
 import com.google.gson.Gson;
-import com.scau.myframework.mvc.annotation.*;
+import com.scau.myframework.mvc.annotation.MyRequestMapping;
+import com.scau.myframework.mvc.annotation.MyRequestParam;
 import com.scau.myframework.mvc.entity.ModelAndView;
 import com.scau.myframework.mvc.helper.ClassHelper;
 import com.scau.myframework.mvc.helper.IocHelper;
-
 import com.scau.myframework.mvc.util.CastUtils;
+import com.scau.myframework.mvc.util.PropertiesUtil;
 import com.scau.myframework.mvc.util.PropertiesUtils;
 import com.scau.myframework.mvc.util.ReflectionUtils;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,16 +30,36 @@ public class DispatcherServlet extends HttpServlet {
     private Map<String,Object> beanMap;
     Map<String,Object> handlerMap ;
 
+
     @Override
     public void init(ServletConfig config) throws ServletException {
 
+        super.init(config);
         //TODO 获取IOC容器，后期应该通过ioc模块完成此功能而不是IocHelper（IocHelper只能完成mvc的依赖注入逻辑）
+        IocHelper.doInstance();
+        IocHelper.doAutoWired();
         beanMap =  IocHelper.getBeanMap();
 
         //将请求路径与对应的处理方法映射起来(即：解析url和Method的关联关系)
         initHandlerMappings();
 
-        //TODO 处理访问静态资源、页面等情况
+
+        //TODO 处理访问静态资源、jsp页面等情况
+        //获取ServletContext对象（用于注册Servlet）
+        ServletContext servletContext = super.getServletContext();
+
+        if(null == servletContext){
+            System.out.println("+++++++++++++++++++++++++++++++");
+        }
+
+        //注册处理JSP的servlet
+        //ServletRegistration jspServlet = servletContext.getServletRegistration("jsp");
+        //注册了才能识别jsp
+       // jspServlet.addMapping("/WEB-INF/jsp/"+"*");
+        //注册处理静态资源的默认Servlet
+       // ServletRegistration defaultServlet =  servletContext.getServletRegistration("default");
+       // defaultServlet.addMapping("/"+"*");
+
     }
 
     private  void initHandlerMappings() {
@@ -76,20 +92,24 @@ public class DispatcherServlet extends HttpServlet {
         String uri = req.getRequestURI();
         String contextPath = req.getContextPath();
         String requestPath = uri.replace(contextPath,"");
-
         handle(req, resp, requestPath);
     }
 
     //根据传入的url,利用反射，完成请求处理
     //只能为带有@MyRequestParam注解的参数赋值，但只是用Object存储，没有进行类型转换
     //后期还要考虑是否要给对象类型的参数自动注入
-    private  void handle(HttpServletRequest req, HttpServletResponse resp, String  requestPath){
+    private  void handle(HttpServletRequest req, HttpServletResponse resp, String  requestPath) throws ServletException, IOException {
 
         Method method = (Method) handlerMap.get(requestPath);
 
 
         Object instance = beanMap.get("/" + requestPath.split("/")[1]);
-
+        if(null == instance || null == method) {
+            //defaultServlet;//这里是否要看其是否为静态资源？
+            //req.getRequestDispatcher(requestPath).forward(req, resp);
+            resp.getWriter().println("找不到----->mapping");
+            return;
+        }
         Object[] args = getArgs(method,req,resp);
 
         Object result = ReflectionUtils.invokeMethod(instance,method,args);
@@ -102,10 +122,12 @@ public class DispatcherServlet extends HttpServlet {
 
             try {
                 if (((String) result).startsWith("redirect:")){
-                    resp.sendRedirect(req.getContextPath()+((String) result).replace("redirect:","").trim());
+                    resp.sendRedirect(req.getContextPath()+"/"+((String) result).replace("redirect:","").trim());
+                }else {
+                    req.getRequestDispatcher("/WEB-INF/jsp/" + (String) result).forward(req, resp);
                 }
-                req.getRequestDispatcher(PropertiesUtils.getJspPath()+result).forward(req, resp);
             } catch (Exception e) {
+                e.printStackTrace();
             }
             return;
         } else if (result instanceof ModelAndView){
@@ -168,5 +190,4 @@ public class DispatcherServlet extends HttpServlet {
         }
         return args;
     }
-
 }

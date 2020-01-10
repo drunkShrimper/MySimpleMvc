@@ -8,6 +8,10 @@ public class PropertiesUtils {
     }
 
     public static String getJspPath() {
-        return  "";
+        return  "/WEB-INF/jsp/";
+    }
+
+    public static String getStaticPath() {
+        return "/";
     }
 }
