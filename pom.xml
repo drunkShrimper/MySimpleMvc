@@ -103,7 +103,7 @@
                     <!-- 通过maven tomcat7:run运行项目时，访问项目的端口号 -->
                     <port>9527</port>
                     <!-- 项目访问路径  本例：localhost:9090,  如果配置的aa， 则访问路径为localhost:9090/aa-->
-                    <path>/mf</path>
+                    <viewName>/mf</viewName>
                 </configuration>
             </plugin>
         </plugins>

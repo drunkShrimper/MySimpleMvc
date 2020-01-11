@@ -11,37 +11,41 @@ import java.util.Map;
 public class ModelAndView {
 
 
-    private String path;
-
-    private Map<String, Object> models;
+    private String viewName;
+    private Map<String, Object> model;
 
     public ModelAndView() {
-        this.models = new HashMap<String, Object>();
+        this.model = new HashMap<String, Object>();
     }
 
-    public ModelAndView(String path) {
-        this.path = path;
-        this.models = new HashMap<String, Object>();
+    public ModelAndView(String viewName) {
+        this.viewName = viewName;
+        this.model = new HashMap<String, Object>();
     }
 
-    public ModelAndView addModel(String key, Object value){
-        models.put(key,value);
+    public ModelAndView(String viewName, Map<String, Object> model) {
+        this.viewName = viewName;
+        this.model = model;
+    }
+
+    public ModelAndView addObject(String key, Object value){
+        model.put(key,value);
         return this;
     }
 
-    public String getPath() {
-        return path;
+    public String getViewName() {
+        return viewName;
     }
 
-    public Map<String, Object> getModels() {
-        return models;
+    public Map<String, Object> getModel() {
+        return model;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
     }
 
-    public void setModels(Map<String, Object> models) {
-        this.models = models;
+    public void setModel(Map<String, Object> model) {
+        this.model = model;
     }
 }

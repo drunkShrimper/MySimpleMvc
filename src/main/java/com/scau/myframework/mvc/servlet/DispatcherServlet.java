@@ -34,37 +34,37 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * ioc容器
      */
-    private Map<String,Object> beanMap;
+    private Map<String, Object> beanMap;
     /**
      * key:请求url
      * value:处理方法
      */
-    Map<String,Object> handlerMap ;
+    Map<String, Object> handlerMap;
 
 
     @Override
     public void init(ServletConfig config) throws ServletException {
 
         //TODO 获取IOC容器，后期应该通过ioc模块完成此功能而不是IocHelper（IocHelper只能完成controller，service的依赖注入逻辑）
-        beanMap =  IocHelper.getBeanMap();
+        beanMap = IocHelper.getBeanMap();
 
         //将请求路径与对应的处理方法映射起来(即：解析url和Method的关联关系)
         initHandlerMappings();
     }
 
-    private  void initHandlerMappings() {
-        handlerMap = new HashMap<String,Object>();
+    private void initHandlerMappings() {
+        handlerMap = new HashMap<String, Object>();
         for (Class<?> clazz : ClassHelper.getControllerClass()) {
             MyRequestMapping typeMapping = clazz.getAnnotation(MyRequestMapping.class);
 
             Method[] methods = clazz.getMethods();
-            for(Method method:methods){
-                if(method.isAnnotationPresent(MyRequestMapping.class)){
+            for (Method method : methods) {
+                if (method.isAnnotationPresent(MyRequestMapping.class)) {
 
                     MyRequestMapping methodMapping = method.getAnnotation(MyRequestMapping.class);
                     String requestPath = typeMapping.value() + methodMapping.value();
-                    handlerMap.put(requestPath,method);
-                }else{
+                    handlerMap.put(requestPath, method);
+                } else {
                     continue;
                 }
             }
@@ -81,72 +81,72 @@ public class DispatcherServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
         String contextPath = req.getContextPath();
-        String requestPath = uri.replace(contextPath,"");
+        String requestPath = uri.replace(contextPath, "");
         handle(req, resp, requestPath);
     }
 
     /**
      * 分发请求
+     *
      * @param req
      * @param resp
      * @param requestPath
      * @throws ServletException
      * @throws IOException
      */
-    private  void handle(HttpServletRequest req, HttpServletResponse resp, String  requestPath) throws ServletException, IOException {
+    private void handle(HttpServletRequest req, HttpServletResponse resp, String requestPath) throws ServletException, IOException {
 
         Method method = (Method) handlerMap.get(requestPath);
-        //没有找到这个
-        if(null == method) {
+
+        if (null == method) {
             resp.getWriter().println("error----->mapping not found!");
             return;
         }
 
         Object instance = beanMap.get("/" + requestPath.split("/")[1]);
-        if(null == instance) {
+        if (null == instance) {
             return;
         }
 
-        Object[] args = getArgs(method,req,resp);
+        Object[] args = getArgs(method, req, resp);
 
-        Object result = ReflectionUtils.invokeMethod(instance,method,args);
+        Object result = ReflectionUtils.invokeMethod(instance, method, args);
 
-        if(null == result) {
+        if (null == result) {
             return;
         }
 
         if (result instanceof String) {
 
-            result = result.toString();
+            String desPath = (String)result;
             try {
-                if (((String) result).startsWith("redirect:")){
-                    resp.sendRedirect(req.getContextPath()+"/"+((String) result).replace("redirect:","").trim());
-                }else {
-                    req.getRequestDispatcher(PropertiesUtils.getViewPrefix() + (String) result + PropertiesUtils.getViewSuffix()).forward(req, resp);
+                if ((desPath.startsWith("redirect:"))) {
+                    resp.sendRedirect(req.getContextPath() + "/"+ desPath.replace("redirect:", "").trim() );
+                } else {
+                    req.getRequestDispatcher(PropertiesUtils.getViewPrefix() + desPath + PropertiesUtils.getViewSuffix()).forward(req, resp);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
             return;
-        } else if (result instanceof ModelAndView){
+        } else if (result instanceof ModelAndView) {
 
             ModelAndView mv = (ModelAndView) result;
-            if (mv.getPath() != null) {
+            if (mv.getViewName() != null) {
                 try {
-                    if (mv.getPath().startsWith("redirect:")){
-                        resp.sendRedirect(req.getContextPath()+mv.getPath().replace("redirect:","").trim());
+                    if (mv.getViewName().startsWith("redirect:")) {
+                        resp.sendRedirect(req.getContextPath() + mv.getViewName().replace("redirect:", "").trim());
                         return;
                     }
-                    Map<String, Object> model = mv.getModels();
-                    for(Map.Entry<String, Object> entry:model.entrySet()){
+                    Map<String, Object> model = mv.getModel();
+                    for (Map.Entry<String, Object> entry : model.entrySet()) {
                         req.setAttribute(entry.getKey(), entry.getValue());
                     }
-                    req.getRequestDispatcher(PropertiesUtils.getViewPrefix()+mv.getPath()+PropertiesUtils.getViewSuffix()).forward(req, resp);
+                    req.getRequestDispatcher(PropertiesUtils.getViewPrefix() + mv.getViewName() + PropertiesUtils.getViewSuffix()).forward(req, resp);
                 } catch (Exception e) {
-
                 }
             }
-        } else{//其他情况统一返回json数据，（当然包括标注了@MyResponseBody注解的）
+        } else {//其他情况统一返回json数据，（当然包括标注了@MyResponseBody注解的）
             try {
                 Gson gson = new Gson();
                 resp.setContentType("application/json");
@@ -161,28 +161,26 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    private Object[] getArgs(Method method,HttpServletRequest req, HttpServletResponse resp){
+    private Object[] getArgs(Method method, HttpServletRequest req, HttpServletResponse resp) {
         Class<?>[] paramClazzs = method.getParameterTypes();
         Parameter[] parameters = method.getParameters();
 
         Object[] args = new Object[paramClazzs.length];
 
         int idx = 0;
-        for (int i=0; i<paramClazzs.length;i++){
+        for (int i = 0; i < paramClazzs.length; i++) {
             //如果方法的参数中写有原生的request，response
-            if(ServletRequest.class.isAssignableFrom(paramClazzs[i])){
+            if (ServletRequest.class.isAssignableFrom(paramClazzs[i])) {
                 args[idx++] = req;
-            }else if(ServletResponse.class.isAssignableFrom(paramClazzs[i])){
+            } else if (ServletResponse.class.isAssignableFrom(paramClazzs[i])) {
                 args[idx++] = resp;
-            } else{
-                //一般只在基本类型上使用@MyRequestParam，对于POJO类型并不用使用注解也会自动注入
-                if(parameters[i].isAnnotationPresent(MyRequestParam.class)){
+            } else {
+                //一般只在基本类型上使用@MyRequestParam，对于POJO并不用使用注解也会自动注入
+                if (parameters[i].isAnnotationPresent(MyRequestParam.class)) {
                     MyRequestParam requestParam = parameters[i].getAnnotation(MyRequestParam.class);
-                    args[idx++] = TypeCastUtils.getBasicInstanceByString(paramClazzs[i],req.getParameter(requestParam.value()));
-                }else{
-                    //没有标注解的，如果是POJO类型，请求参数的name和POJO的属性名要相同才能为其注入。这也是springmvc的约定...(貌似)
-                    //TODO 但是复杂类型如何处理呢？ 貌似spring mvc也是可以自动注入的（即：支持级联属性的注入）
-                    args[idx++] = TypeCastUtils.getPojoInstance(paramClazzs[i],req.getParameterMap());
+                    args[idx++] = TypeCastUtils.getBasicInstanceByString(paramClazzs[i], req.getParameter(requestParam.value()));
+                } else {
+                    args[idx++] = TypeCastUtils.getPojoInstance(paramClazzs[i], req.getParameterMap());
                 }
             }
         }
