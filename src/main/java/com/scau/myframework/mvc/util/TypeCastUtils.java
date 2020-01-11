@@ -11,7 +11,7 @@ import java.util.Set;
  * @author: lipan
  * @time: 2019/11/10 11:05
  */
-public class CastUtils {
+public class TypeCastUtils {
 
 
     static Set<Class<?>> wrapperTypes = new HashSet<Class<?>>();

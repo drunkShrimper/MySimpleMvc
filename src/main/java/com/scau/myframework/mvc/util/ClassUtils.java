@@ -3,12 +3,11 @@ package com.scau.myframework.mvc.util;
 
 
 /**
- * Created on 2018/8/8 22:03.
- *
- * @author SinKitwah
- * @Description 类加载器-获取基础包下的所有类
+ * @description: 提供类加载器
+ * @author: lipan
+ * @time: 2020/1/11 10:42
  */
-public class ClassUtil {
+public class ClassUtils {
 
 
     public static ClassLoader getClassLoader(){

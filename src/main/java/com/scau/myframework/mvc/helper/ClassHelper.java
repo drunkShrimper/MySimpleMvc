@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @description:
+ * @description: 类的相关操作
  * @author: lipan
  * @time: 2019/10/26 13:23
  */

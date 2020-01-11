@@ -1,14 +1,12 @@
 package com.scau.myframework.mvc.util;
 
-import com.scau.myframework.mvc.annotation.MyController;
-import com.scau.myframework.mvc.annotation.MyRequestMapping;
-import com.scau.myframework.mvc.annotation.MyService;
-
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+/**
+ * @description: 将反射的常用功能封装起来
+ * @author: lipan
+ * @time: 2020/1/11 10:42
+ */
 public class ReflectionUtils {
     public static Object newInstance(Class<?> cls){
         Object instance = null;

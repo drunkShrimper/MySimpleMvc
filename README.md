@@ -1,7 +1,27 @@
 # MyFramework
-## TODO
-### 加上必要的注释
-### 将MyDispatcherServlet的各个函数分离成到工具类中
-### 完成上面两个应该开始完成对参数类型的转换
-### 有空配个maven的tomcat，原生启动太慢了
-### xml方式的IOC写了个开头，不知道还要不要做下去 ..
+
+## 还未实现的功能
+- restful风格
+- 路径变量
+- 使用对象接收请求参数 对象属性 必须 和 form表单中的属性Name值一致（支持级联属性）
+```html
+<form action="handler/testObjectProperties" method="post">
+    id:<input name="id" type="text" />
+    name:<input name="name" type="text" />
+    家庭地址:<input name="address.homeAddress" type="text" />
+    学校地址:<input name="address.schoolAddress" type="text" />
+    <input type="submit" value="查">
+</form>
+
+```java
+@RequestMapping(value="testObjectProperties")
+//student属性 必须 和 form表单中的属性Name值一致（支持级联属性）
+public String  testObjectProperties(Student student) {
+    System.out.println(student.getId() ....);
+    return "success" ;
+}
+
+## 目前存在的问题
+- 在maven配置的tomcat7插件运行报错，但是使用本地tomcat正常
+
+
