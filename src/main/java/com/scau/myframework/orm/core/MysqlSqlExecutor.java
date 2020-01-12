@@ -4,7 +4,7 @@ import com.scau.myframework.orm.entity.ColumnInfo;
 import com.scau.myframework.orm.entity.TableInfo;
 import com.scau.myframework.orm.util.JDBCUtils;
 import com.scau.myframework.orm.util.ReflectUtils;
-import com.scau.myframework.test.po.Employee;
+import com.scau.myframework.test.vo.EmpVO;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:
@@ -21,39 +22,18 @@ import java.util.List;
  */
 public class MysqlSqlExecutor implements SqlExecutor {
 
-    public static void testDML() {
-        Employee e = new Employee();
-        e.setName("lily");
-        e.setId(2);
-        new MysqlSqlExecutor().delete(e);
-//		new MysqlSqlExecutor().insert(e);
-//        new MysqlSqlExecutor().update(e, new String[]{"Employeename", "age", "salary"});
-    }
-
-    public static void testQueryRows() {
-        List<Employee> list = new MysqlSqlExecutor().queryRows("select id,Employeename,age from Employee where age>? and salary<?",
-                Employee.class, new Object[]{10, 5000});
-
-        for (Employee e : list) {
-            System.out.println(e.getName());
-        }
-
-        String sql2 = "select e.id,e.Employeename,salary+bonus 'xinshui',age,d.dname 'deptName',d.address 'deptAddr' from Employee e "
-                + "join dept d on e.deptId=d.id ";
-        //List<EmployeeVO> list2 = new MysqlSqlExecutor().queryRows(sql2, EmployeeVO.class, null);
-
-        //  for (EmployeeVO e : list2) {
-        //     System.out.println(e.getEmployeename() + "-" + e.getDeptAddr() + "-" + e.getXinshui());
-        // }
-
-    }
-
-
     public static void main(String[] args) {
-//		Number obj = (Number)new MysqlSqlExecutor().queryValue("select count(*) from Employee where salary>?",new Object[]{1000});
-//        Number obj = new MysqlSqlExecutor().queryNumber("select count(*) from Employee where salary>?", new Object[]{1000});
-//        System.out.println(obj.doubleValue());
-        testDML();
+		Number obj = (Number)new MysqlSqlExecutor().queryValue("select count(*) from Employee where salary>?",new Object[]{500});
+        //Number obj = new MysqlSqlExecutor().queryNumber("select count(*) from Employee where salary>?", new Object[]{1000});
+        System.out.println(obj.longValue());
+
+//        String sql2 = "select e.id,e.name,salary+bonus 'xinshui',age,d.department_name 'deptName',d.address 'deptAddr' from employee e "
+//                +"join department d on e.d_id=d.id ";
+//        List<EmpVO> list2 = new MysqlSqlExecutor().queryRows(sql2, EmpVO.class, null);
+//
+//        for(EmpVO e:list2){
+//            System.out.println(e.getName()+"-"+e.getDeptAddr()+"-"+e.getXinshui());
+//        }
     }
 
     @Override
@@ -141,27 +121,27 @@ public class MysqlSqlExecutor implements SqlExecutor {
     public List queryRows(String sql, Class clazz, Object[] params) {
 
         Connection conn = DBManager.getConn();
-        List list = null;    //存储查询结果的容器
+        List list = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             ps = conn.prepareStatement(sql);
             //给sql设参
             JDBCUtils.handleParams(ps, params);
-            System.out.println(ps);
+            String logMsg = ps.toString().substring(ps.toString().indexOf(":") + 1, ps.toString().length());
+            System.out.println("orm log----->" + logMsg);
             rs = ps.executeQuery();
 
             ResultSetMetaData metaData = rs.getMetaData();
-            //多行
+
             while (rs.next()) {
                 if (list == null) {
                     list = new ArrayList();
                 }
-                Object rowObj = clazz.newInstance();   //调用javabean的无参构造器
+                Object rowObj = clazz.newInstance();
 
-                //多列       select username ,pwd,age from user where id>? and age>18
                 for (int i = 0; i < metaData.getColumnCount(); i++) {
-                    String columnName = metaData.getColumnLabel(i + 1);  //username
+                    String columnName = metaData.getColumnLabel(i + 1);
                     Object columnValue = rs.getObject(i + 1);
 
                     //调用rowObj对象的setUsername(String uname)方法，将columnValue的值设置进去
@@ -195,7 +175,8 @@ public class MysqlSqlExecutor implements SqlExecutor {
             ps = conn.prepareStatement(sql);
             //给sql设参
             JDBCUtils.handleParams(ps, params);
-            System.out.println(ps);
+            String logMsg = ps.toString().substring(ps.toString().indexOf(":") + 1, ps.toString().length());
+            System.out.println("orm log----->" + logMsg);
             rs = ps.executeQuery();
             while (rs.next()) {
                 value = rs.getObject(1);
@@ -212,11 +193,11 @@ public class MysqlSqlExecutor implements SqlExecutor {
 
     @Override
     public int update(Object obj, String[] fieldNames) {
-        //obj{"uanme","pwd"}-->update 表名  set uname=?,pwd=? where id=?
+
         Class c = obj.getClass();
-        List<Object> params = new ArrayList<Object>();   //存储sql的参数对象
+        List<Object> params = new ArrayList<Object>();
         TableInfo tableInfo = TableContext.poClassTableMap.get(c);
-        ColumnInfo priKey = tableInfo.getOnlyPrimaryKey();   //获得唯一的主键
+        ColumnInfo priKey = tableInfo.getOnlyPrimaryKey();
         StringBuilder sql = new StringBuilder("update " + tableInfo.getTableName() + " set ");
 
         for (String fname : fieldNames) {
@@ -228,8 +209,24 @@ public class MysqlSqlExecutor implements SqlExecutor {
         sql.append(" where ");
         sql.append(priKey.getColumnName() + "=? ");
 
-        params.add(ReflectUtils.invokeGet(priKey.getColumnName(), obj));    //主键的值
+        params.add(ReflectUtils.invokeGet(priKey.getColumnName(), obj));
 
         return executeDML(sql.toString(), params.toArray());
+    }
+
+    @Override
+    public int update(Object obj) {
+
+        ArrayList<String> fieldNameList = new ArrayList<String>();
+        Class c = obj.getClass();
+        TableInfo tableInfo = TableContext.poClassTableMap.get(c);
+        Map<String, ColumnInfo> columns = tableInfo.getColumns();
+        for (ColumnInfo column : columns.values()) {
+            if (column.getKeyType() != 1) {
+                fieldNameList.add(column.getColumnName());
+            }
+        }
+        String[] fieldNames = fieldNameList.toArray(new String[0]);
+        return update(obj, fieldNames);
     }
 }

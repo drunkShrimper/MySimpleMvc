@@ -52,6 +52,14 @@ public interface SqlExecutor {
     public int update(Object obj, String[] fieldNames);
 
     /**
+     * 更新对象对应的记录
+     *
+     * @param obj 所要更新的对象
+     * @return 执行sql语句后影响记录的行数
+     */
+    public int update(Object obj);
+
+    /**
      * 查询返回多行记录，并将每行记录封装到clazz指定的类的对象中
      *
      * @param sql    查询语句
