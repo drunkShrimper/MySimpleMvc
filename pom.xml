@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
-    <name>mymvc Maven Webapp</name>
+    <columnName>mymvc Maven Webapp</columnName>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 
@@ -36,6 +36,11 @@
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.41</version>
         </dependency>
     </dependencies>
 
@@ -93,19 +98,7 @@
                     <encoding>utf-8</encoding>
                 </configuration>
             </plugin>
-            <!--tomcat插件-->
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <!-- tomcat7的插件， 不同tomcat版本这个也不一样 -->
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <!-- 通过maven tomcat7:run运行项目时，访问项目的端口号 -->
-                    <port>9527</port>
-                    <!-- 项目访问路径  本例：localhost:9090,  如果配置的aa， 则访问路径为localhost:9090/aa-->
-                    <viewName>/mf</viewName>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 </project>

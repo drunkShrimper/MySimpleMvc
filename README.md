@@ -7,10 +7,10 @@
 
 ```html
 <form action="handler/testObjectProperties" method="post">
-    id:<input name="id" type="text" />
-    name:<input name="name" type="text" />
-    家庭地址:<input name="address.homeAddress" type="text" />
-    学校地址:<input name="address.schoolAddress" type="text" />
+    id:<input columnName="id" type="text" />
+    columnName:<input columnName="columnName" type="text" />
+    家庭地址:<input columnName="address.homeAddress" type="text" />
+    学校地址:<input columnName="address.schoolAddress" type="text" />
     <input type="submit" value="查">
 </form> 
 ```
