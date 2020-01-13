@@ -1,7 +1,7 @@
 package com.scau.myframework.orm.test.dao;
 
-import com.scau.myframework.orm.core.MysqlSqlExecutor;
-import com.scau.myframework.orm.core.SqlExecutor;
+import com.scau.myframework.orm.core.DefaultSqlSessionFactory;
+import com.scau.myframework.orm.core.SqlSession;
 import com.scau.myframework.orm.test.bean.Employee;
 import com.scau.myframework.orm.test.vo.EmpVO;
 import org.junit.Test;
@@ -14,17 +14,17 @@ import java.util.List;
  * @author: lipan
  * @time: 2020/1/13 10:37
  */
-public class SqlExecutorTest {
+public class SqlSessionTest {
 
-    SqlExecutor sqlExecutor = new MysqlSqlExecutor();
+    SqlSession sqlSession = new DefaultSqlSessionFactory().openSession();
 
     @Test
     public void deleteTest() {
         Employee employee = new Employee();
         employee.setId(3);
-        sqlExecutor.delete(employee);
+        sqlSession.delete(employee);
 
-        sqlExecutor.delete(Employee.class, 2);
+        sqlSession.delete(Employee.class, 2);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class SqlExecutorTest {
         Employee employee = new Employee();
         employee.setId(5);
         employee.setBonus(5000.0);
-        sqlExecutor.insert(employee);
+        sqlSession.insert(employee);
     }
 
     @Test
@@ -42,15 +42,15 @@ public class SqlExecutorTest {
         employee.setBonus(2000.0);
         employee.setName("zhang");
         employee.setSalary(888.5);
-        sqlExecutor.update(employee, new String[]{"name", "salary"});
-        sqlExecutor.update(employee);
+        sqlSession.update(employee, new String[]{"name", "salary"});
+        sqlSession.update(employee);
     }
 
     @Test
     public void queryRowsTest() {
         String sql2 = "select e.id,e.name,salary+bonus 'xinshui',age,d.department_name 'deptName',d.address 'deptAddr' from employee e "
                 + "join department d on e.d_id=d.id ";
-        List<EmpVO> list2 = new MysqlSqlExecutor().queryRows(sql2, EmpVO.class, null);
+        List<EmpVO> list2 = sqlSession.queryRows(sql2, EmpVO.class, null);
 
         for (EmpVO e : list2) {
             System.out.println(e.toString());
@@ -59,19 +59,19 @@ public class SqlExecutorTest {
 
     @Test
     public void queryUniqueRowTest() {
-        Employee e = (Employee) sqlExecutor.queryUniqueRow("select * from Employee where id=?", Employee.class, new Object[]{2});
+        Employee e = (Employee) sqlSession.queryUniqueRow("select * from Employee where id=?", Employee.class, new Object[]{4});
         System.out.println(e);
     }
 
     @Test
     public void queryNumberTest() {
-        Number obj = sqlExecutor.queryNumber("select count(*) from Employee where salary>?", new Object[]{500});
+        Number obj = sqlSession.queryNumber("select count(*) from Employee where salary>?", new Object[]{500});
         System.out.println(obj.longValue());
     }
 
     @Test
     public void queryValueTest() {
-        Date obj = (Date) sqlExecutor.queryValue("select age from Employee where id=?", new Object[]{4});
+        Date obj = (Date) sqlSession.queryValue("select age from Employee where id=?", new Object[]{4});
         System.out.println(obj);
     }
 }
