@@ -226,7 +226,21 @@ public abstract class SqlSession implements Cloneable {
      */
     public Object queryUniqueRow(String sql, Class clazz, Object[] params) {
         List list = queryRows(sql, clazz, params);
-        return (list == null && list.size() > 0) ? null : list.get(0);
+        return (list != null && list.size() > 0) ? list.get(0) : null;
+    }
+
+    /**
+     * 根据id查询记录
+     *
+     * @param clazz 封装数据的javabean类的Class对象
+     * @param id    主键的值
+     * @return 查询到的结果
+     */
+    public Object queryById(Class clazz, Object id) {
+        TableInfo tableInfo = TableContext.poClassTableMap.get(clazz);
+        ColumnInfo onlyPriKey = tableInfo.getOnlyPrimaryKey();
+        String sql = "select * from " + tableInfo.getTableName() + " where " + onlyPriKey.getColumnName() + "=? ";
+        return queryUniqueRow(sql, clazz, new Object[]{id});
     }
 
     /**
@@ -273,11 +287,12 @@ public abstract class SqlSession implements Cloneable {
 
     /**
      * 分页查询
+     *
      * @param pageNum 第几页数据
-     * @param size 每页显示多少记录
+     * @param size    每页显示多少记录
      * @return
      */
-    public abstract Object queryPagenate(int pageNum,int size);
+    public abstract Object queryPagenate(int pageNum, int size);
 
 
     @Override

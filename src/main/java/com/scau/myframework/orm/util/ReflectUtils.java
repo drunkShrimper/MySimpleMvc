@@ -29,9 +29,11 @@ public class ReflectUtils {
 
     public static void invokeSet(Object obj, String columnName, Object columnValue) {
         try {
-            Method m = obj.getClass().getDeclaredMethod("set" + StringUtils.firstChar2UpperCase(columnName),
-                    columnValue.getClass());
-            m.invoke(obj, columnValue);
+            if (null != columnValue) {
+                Method m = obj.getClass().getDeclaredMethod("set" + StringUtils.firstChar2UpperCase(columnName),
+                        columnValue.getClass());
+                m.invoke(obj, columnValue);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
