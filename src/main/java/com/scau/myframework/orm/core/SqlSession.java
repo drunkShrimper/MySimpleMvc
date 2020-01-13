@@ -30,7 +30,7 @@ public abstract class SqlSession implements Cloneable {
      * @return 执行sql语句后影响记录的行数
      */
     public int executeDML(String sql, Object[] params) {
-        Connection conn = DBManager.getConn();
+        Connection conn = DBManager.getConnection();
         int count = 0;
         PreparedStatement ps = null;
         try {
@@ -177,7 +177,7 @@ public abstract class SqlSession implements Cloneable {
      */
     public List queryRows(String sql, Class clazz, Object[] params) {
 
-        Connection conn = DBManager.getConn();
+        Connection conn = DBManager.getConnection();
         List list = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -237,7 +237,7 @@ public abstract class SqlSession implements Cloneable {
      * @return 查询到的结果
      */
     public Object queryValue(String sql, Object[] params) {
-        Connection conn = DBManager.getConn();
+        Connection conn = DBManager.getConnection();
         Object value = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

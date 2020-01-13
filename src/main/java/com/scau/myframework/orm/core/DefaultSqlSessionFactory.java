@@ -24,8 +24,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //加载po包下面所有的类，便于重用，提高效率！
         TableContext.doJavaBeanToTableMapping();
     }
 
@@ -38,6 +36,4 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
             return null;
         }
     }
-
-
 }

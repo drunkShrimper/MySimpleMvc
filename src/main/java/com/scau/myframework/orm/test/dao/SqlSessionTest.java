@@ -6,6 +6,7 @@ import com.scau.myframework.orm.test.bean.Employee;
 import com.scau.myframework.orm.test.vo.EmpVO;
 import org.junit.Test;
 
+import javax.sound.midi.Soundbank;
 import java.sql.Date;
 import java.util.List;
 
@@ -73,5 +74,15 @@ public class SqlSessionTest {
     public void queryValueTest() {
         Date obj = (Date) sqlSession.queryValue("select age from Employee where id=?", new Object[]{4});
         System.out.println(obj);
+    }
+
+    @Test
+    public void poolTest() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            queryRowsTest();
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
     }
 }

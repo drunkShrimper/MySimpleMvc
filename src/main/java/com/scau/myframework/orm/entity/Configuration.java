@@ -35,13 +35,20 @@ public class Configuration {
      */
     private String poPackage;
 
+    /**
+     * 连接池的最小连接数
+     */
+    private Integer poolMinSize;
+
+    /**
+     * 连接池的最大连接数
+     */
+    private Integer poolMaxSize;
 
     public Configuration() {
     }
 
-    public Configuration(String driver, String url, String user, String password,
-                         String usingDB, String srcPath, String poPackage) {
-        super();
+    public Configuration(String driver, String url, String user, String password, String usingDB, String srcPath, String poPackage, Integer poolMinSize, Integer poolMaxSize) {
         this.driver = driver;
         this.url = url;
         this.user = user;
@@ -49,8 +56,9 @@ public class Configuration {
         this.usingDB = usingDB;
         this.srcPath = srcPath;
         this.poPackage = poPackage;
+        this.poolMinSize = poolMinSize;
+        this.poolMaxSize = poolMaxSize;
     }
-
 
     public String getDriver() {
         return driver;
@@ -106,5 +114,21 @@ public class Configuration {
 
     public void setPoPackage(String poPackage) {
         this.poPackage = poPackage;
+    }
+
+    public Integer getPoolMinSize() {
+        return poolMinSize;
+    }
+
+    public void setPoolMinSize(Integer poolMinSize) {
+        this.poolMinSize = poolMinSize;
+    }
+
+    public Integer getPoolMaxSize() {
+        return poolMaxSize;
+    }
+
+    public void setPoolMaxSize(Integer poolMaxSize) {
+        this.poolMaxSize = poolMaxSize;
     }
 }

@@ -39,7 +39,7 @@ public class TableContext {
     static {
         try {
             //初始化获得表的信息
-            Connection con = DBManager.getConn();
+            Connection con = DBManager.getConnection();
             DatabaseMetaData dbmd = con.getMetaData();
 
             ResultSet tableRet = dbmd.getTables(null, "%", "%", new String[]{"TABLE"});
@@ -72,24 +72,8 @@ public class TableContext {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        //每次启动都自动将JavaBean同与数据库表同步
-        generateJavaBeanFiles();
-
-        //加载po包下面所有的类，便于重用，提高效率！
-        doJavaBeanToTableMapping();
     }
 
-    /**
-     * 根据表结构，更新配置的po包下面的java类
-     * 实现了从表结构转化到类结构
-     */
-    public static void generateJavaBeanFiles() {
-        Map<String, TableInfo> map = TableContext.tables;
-        for (TableInfo t : map.values()) {
-            JavaBeanFileGenerator.generateJavaBeanFile(t, new MySqlTypeConvertor());
-        }
-    }
 
     /**
      * 将po的class对象和表信息对象关联起来，便于重用！

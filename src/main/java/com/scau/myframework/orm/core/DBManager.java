@@ -3,6 +3,7 @@ package com.scau.myframework.orm.core;
 
 
 import com.scau.myframework.orm.entity.Configuration;
+import com.scau.myframework.orm.pool.ConnectionPool;
 import com.scau.myframework.orm.util.PropertiesUtils;
 
 import java.io.IOException;
@@ -16,16 +17,10 @@ import java.util.Properties;
  */
 public class DBManager {
 
-    public static Connection getConn() {
-        try {
-            Configuration configuration = PropertiesUtils.getConfiguration();
-            Class.forName(configuration.getDriver());
-            //直接建立连接，后期增加连接池处理，提高效率！！！
-            return DriverManager.getConnection(configuration.getUrl(), configuration.getUser(), configuration.getPassword());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private static ConnectionPool connectionPool = new ConnectionPool();
+
+    public static Connection getConnection() {
+        return connectionPool.getConnection();
     }
 
     public static void close(ResultSet rs, Statement ps, Connection conn) {
@@ -51,12 +46,6 @@ public class DBManager {
     }
 
     public static void close(Connection conn) {
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        connectionPool.close(conn);
     }
 }

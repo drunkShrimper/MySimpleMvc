@@ -31,6 +31,8 @@ public class PropertiesUtils {
         configuration.setUrl(properties.getProperty("url"));
         configuration.setUser(properties.getProperty("user"));
         configuration.setUsingDB(properties.getProperty("usingDB"));
+        configuration.setPoolMinSize(Integer.parseInt(properties.getProperty("poolMinSize")));
+        configuration.setPoolMaxSize(Integer.parseInt(properties.getProperty("poolMaxSize")));
     }
 
     public static Configuration getConfiguration() {

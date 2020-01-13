@@ -23,13 +23,28 @@ import java.util.Map;
  */
 public class JavaBeanFileGenerator {
 
+    private JavaBeanFileGenerator() {
+    }
+
+    /**
+     * 根据表信息生成javabean的源代码并写入配置文件db.properties中PoPackage属性指定的包下
+     *
+     */
+    public static void generate() {
+
+        Map<String, TableInfo> map = TableContext.tables;
+        for (TableInfo t : map.values()) {
+            generateJavaBeanFile(t, new MySqlTypeConvertor());
+        }
+    }
+
     /**
      * 根据表信息生成java类的源代码并写入配置文件db.properties中PoPackage属性指定的包下
      *
      * @param tableInfo 数据库中的表信息
      * @param convertor 数据类型转化器
      */
-    public static void generateJavaBeanFile(TableInfo tableInfo, TypeConvertor convertor) {
+    private static void generateJavaBeanFile(TableInfo tableInfo, TypeConvertor convertor) {
 
         String srcCodeStr = createJavaSrcCodeStr(tableInfo, convertor);
 
@@ -161,13 +176,4 @@ public class JavaBeanFileGenerator {
 
         return setMethodSrcCodeStr.toString();
     }
-
-    public static void main(String[] args) {
-
-        Map<String, TableInfo> map = TableContext.tables;
-        for (TableInfo t : map.values()) {
-            generateJavaBeanFile(t, new MySqlTypeConvertor());
-        }
-    }
-
 }
