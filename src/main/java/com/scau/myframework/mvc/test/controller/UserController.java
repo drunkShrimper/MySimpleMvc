@@ -57,7 +57,8 @@ public class UserController {
 
     @MyRequestMapping("/showpage")
     public String showPage(HttpServletRequest request, HttpServletResponse response) {
-
+        request.setAttribute("pwd","45666");
+        request.setAttribute("user",new User("jack",123));
         return "show";
     }
 

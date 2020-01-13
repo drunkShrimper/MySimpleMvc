@@ -6,7 +6,7 @@
 </head>
 <body>
 <%
-    String password = (String)request.getAttribute("password");
+    String password = (String)request.getAttribute("pwd");
     out.print(password);
 
     User user = (User)request.getAttribute("user");
