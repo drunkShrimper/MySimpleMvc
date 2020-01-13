@@ -1,4 +1,4 @@
-package com.scau.myframework.test.vo;
+package com.scau.myframework.orm.test.vo;
 
 import java.sql.Date;
 
@@ -61,5 +61,16 @@ public class EmpVO {
 	
 	public EmpVO() {
 	}
-	
+
+	@Override
+	public String toString() {
+		return "EmpVO{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", xinshui=" + xinshui +
+				", age=" + age +
+				", deptName='" + deptName + '\'' +
+				", deptAddr='" + deptAddr + '\'' +
+				'}';
+	}
 }

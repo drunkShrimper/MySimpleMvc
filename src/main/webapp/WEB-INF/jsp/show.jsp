@@ -1,4 +1,4 @@
-<%@ page import="com.scau.myframework.test.entity.User" %>
+<%@ page import="com.scau.myframework.mvc.test.entity.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>

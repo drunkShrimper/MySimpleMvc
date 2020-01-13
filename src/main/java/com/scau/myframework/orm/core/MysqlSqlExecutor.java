@@ -4,7 +4,6 @@ import com.scau.myframework.orm.entity.ColumnInfo;
 import com.scau.myframework.orm.entity.TableInfo;
 import com.scau.myframework.orm.util.JDBCUtils;
 import com.scau.myframework.orm.util.ReflectUtils;
-import com.scau.myframework.test.vo.EmpVO;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -21,20 +20,6 @@ import java.util.Map;
  * @time: 2020/1/12 20:37
  */
 public class MysqlSqlExecutor implements SqlExecutor {
-
-    public static void main(String[] args) {
-		Number obj = (Number)new MysqlSqlExecutor().queryValue("select count(*) from Employee where salary>?",new Object[]{500});
-        //Number obj = new MysqlSqlExecutor().queryNumber("select count(*) from Employee where salary>?", new Object[]{1000});
-        System.out.println(obj.longValue());
-
-//        String sql2 = "select e.id,e.name,salary+bonus 'xinshui',age,d.department_name 'deptName',d.address 'deptAddr' from employee e "
-//                +"join department d on e.d_id=d.id ";
-//        List<EmpVO> list2 = new MysqlSqlExecutor().queryRows(sql2, EmpVO.class, null);
-//
-//        for(EmpVO e:list2){
-//            System.out.println(e.getName()+"-"+e.getDeptAddr()+"-"+e.getXinshui());
-//        }
-    }
 
     @Override
     public void delete(Class clazz, Object id) {
@@ -168,7 +153,7 @@ public class MysqlSqlExecutor implements SqlExecutor {
     @Override
     public Object queryValue(String sql, Object[] params) {
         Connection conn = DBManager.getConn();
-        Object value = null;    //存储查询结果的对象
+        Object value = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -202,8 +187,11 @@ public class MysqlSqlExecutor implements SqlExecutor {
 
         for (String fname : fieldNames) {
             Object fvalue = ReflectUtils.invokeGet(fname, obj);
-            params.add(fvalue);
-            sql.append(fname + "=?,");
+            if (null != fvalue) {
+                params.add(fvalue);
+                sql.append(fname + "=?,");
+            }
+
         }
         sql.setCharAt(sql.length() - 1, ' ');
         sql.append(" where ");

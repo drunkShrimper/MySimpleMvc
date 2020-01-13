@@ -1,17 +1,15 @@
-package com.scau.myframework.test.controller;
+package com.scau.myframework.mvc.test.controller;
 
 
 import com.scau.myframework.mvc.annotation.*;
 import com.scau.myframework.mvc.entity.ModelAndView;
-import com.scau.myframework.test.entity.User;
-import com.scau.myframework.test.service.UserService;
+import com.scau.myframework.mvc.test.entity.User;
+import com.scau.myframework.mvc.test.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @MyController("UserController")
 @MyRequestMapping("/user")

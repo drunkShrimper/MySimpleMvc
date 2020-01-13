@@ -1,4 +1,4 @@
-package com.scau.myframework.test.entity;
+package com.scau.myframework.mvc.test.entity;
 
 /**
  * @description:

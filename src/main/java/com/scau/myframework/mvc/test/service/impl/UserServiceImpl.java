@@ -1,9 +1,9 @@
-package com.scau.myframework.test.service.impl;
+package com.scau.myframework.mvc.test.service.impl;
 
 
 import com.scau.myframework.mvc.annotation.MyService;
-import com.scau.myframework.test.entity.User;
-import com.scau.myframework.test.service.UserService;
+import com.scau.myframework.mvc.test.entity.User;
+import com.scau.myframework.mvc.test.service.UserService;
 
 @MyService("UserServiceImpl")
 public class UserServiceImpl implements UserService {
