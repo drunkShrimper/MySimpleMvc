@@ -294,7 +294,6 @@ public abstract class SqlSession implements Cloneable {
      */
     public abstract Object queryPagenate(int pageNum, int size);
 
-
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();

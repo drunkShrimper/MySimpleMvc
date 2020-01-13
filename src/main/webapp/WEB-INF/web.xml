@@ -4,33 +4,33 @@
 
 <web-app>
 
-    <display-columnName>Archetype Created Web Application</display-columnName>
+    <display-name>Archetype Created Web Application</display-name>
 
     <servlet>
-        <servlet-columnName>myDispatcherServlet</servlet-columnName>
+        <servlet-name>myDispatcherServlet</servlet-name>
         <servlet-class>com.scau.myframework.mvc.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-        <servlet-columnName>myDispatcherServlet</servlet-columnName>
+        <servlet-name>myDispatcherServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-columnName>default</servlet-columnName>
+        <servlet-name>default</servlet-name>
         <url-pattern>*.jpg</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-columnName>default</servlet-columnName>
+        <servlet-name>default</servlet-name>
         <url-pattern>*.html</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-columnName>default</servlet-columnName>
+        <servlet-name>default</servlet-name>
         <url-pattern>*.js</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-columnName>default</servlet-columnName>
+        <servlet-name>default</servlet-name>
         <url-pattern>*.css</url-pattern>
     </servlet-mapping>
     
